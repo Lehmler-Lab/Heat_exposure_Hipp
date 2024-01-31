@@ -941,6 +941,361 @@ big + plot_annotation(tag_levels = 'A') &
 dev.off()
 
 ```
+#Changing "control" reference group
+
+```{r}
+se1$exposure<- relevel(se1$exposure, 
+                           "pair_fed") # tells the system which group is "control"
+se1 <- se1[ rowSums(assay(se1)) >= 10, ] #remove genes that have a total count less than 10, a good prefilter measure
+```
+
+```{r}
+F_se<-se1[,se1$sex == "female"]
+M_se<-se1[,se1$sex == "male"]
+
+Fdds <- DESeqDataSet(F_se, 
+                    design = ~ exposure) #comparison done between high treatment and vehicle?
+Mdds <- DESeqDataSet(M_se, 
+                    design = ~ exposure) #comparison done between high treatment and vehicle?
+```
+
+```{r}
+Fdds <- DESeq(Fdds)
+resultsNames(Fdds)
+
+Mdds <- DESeq(Mdds)
+resultsNames(Mdds)
+```
+Calling results without any arguments will extract the estimated log2 fold changes and p values for the last variable in the design formula. If there are more than 2 levels for this variable, results will extract the results table for a comparison of the last level over the first level. Treatment 6 vs vehicle
+```{r}
+res_F<-results(Fdds, name = "exposure_exposed_vs_pair_fed")
+res_M<-results(Mdds, name = "exposure_exposed_vs_pair_fed")
+
+res_F
+
+summary(res_F)
+summary(res_M)
+```
+
+
+#***Annotating results***
+How to assign actual gene names to our counts. Using an annotation package for rattus. 
+```{r}
+res_F$symbol <- mapIds(Mus.musculus, #which annotation package model to use
+                     keys=row.names(res_F), #using rownames
+                     column="SYMBOL", #add a column of symbols associated with row.names arguments for the model
+                     keytype="ENSEMBL", #our rownames are gene id's 
+                     multiVals="first")
+```
+
+```{r}
+res_F$ONTOLOGY <- mapIds(Mus.musculus,
+                     keys=row.names(res_F),
+                     column="ONTOLOGYALL",
+                     keytype="ENSEMBL",
+                     multiVals="first")
+```
+
+```{r}
+res_F$Genename <- mapIds(Mus.musculus,
+                     keys=row.names(res_F),
+                     column="GENENAME", #now add a column for gene names or gene description
+                     keytype="ENSEMBL",
+                     multiVals="first")
+```
+
+
+```{r}
+res_F$ensembl <- mapIds(Mus.musculus,
+                     keys=row.names(res_F),
+                     column="ENSEMBL", #now add a column for gene names or gene description
+                     keytype="ENSEMBL",
+                     multiVals="first")
+```
+```{r}
+res_F$ENTREZID <- mapIds(Mus.musculus,
+                     keys=row.names(res_F),
+                     column="ENTREZID", #now add a column for gene names or gene description
+                     keytype="ENSEMBL",
+                     multiVals="first")
+```
+
+```{r}
+res_M$symbol <- mapIds(Mus.musculus, #which annotation package model to use
+                     keys=row.names(res_M), #using rownames
+                     column="SYMBOL", #add a column of symbols associated with row.names arguments for the model
+                     keytype="ENSEMBL", #our rownames are gene id's 
+                     multiVals="first")
+```
+
+```{r}
+res_M$ONTOLOGY <- mapIds(Mus.musculus,
+                     keys=row.names(res_M),
+                     column="ONTOLOGYALL",
+                     keytype="ENSEMBL",
+                     multiVals="first")
+```
+
+```{r}
+res_M$Genename <- mapIds(Mus.musculus,
+                     keys=row.names(res_M),
+                     column="GENENAME", #now add a column for gene names or gene description
+                     keytype="ENSEMBL",
+                     multiVals="first")
+```
+
+```{r}
+res_M$ensembl <- mapIds(Mus.musculus,
+                     keys=row.names(res_M),
+                     column="ENSEMBL", #now add a column for gene names or gene description
+                     keytype="ENSEMBL",
+                     multiVals="first")
+```
+
+```{r}
+res_M$ENTREZID <- mapIds(Mus.musculus,
+                     keys=row.names(res_M),
+                     column="ENTREZID", #now add a column for gene names or gene description
+                     keytype="ENSEMBL",
+                     multiVals="first")
+```
+
+
+```{r}
+F_resOrdered <- res_F[order(res_F$padj),]
+M_resOrdered <- res_M[order(res_M$padj),]
+```
+
+
+#***volcano plots***
+```{r}
+tiff(file = 'Figures/volcano/Female_Exposed_vs_PF_volcano_plot_lung.tiff', units="in", width=8, height=5, res=1000)
+M_vol1<- EnhancedVolcano(res_F,
+    lab = res_F$symbol,
+    x = 'log2FoldChange',
+    y = 'pvalue',
+    title = "Female Exposed vs Pair Fed Lung",
+    subtitle = "",
+    ylim = c(0, -log10(10e-8)),
+    xlim = c(log2(10e-3), -log2(10e-3)),
+    FCcutoff = 1.0,
+    pCutoff = 0.05,
+    labSize = 3.0,
+    colAlpha = 1,
+    legendLabels=c('Not sig.','Log (base 2) FC','p-value',
+      'p-value & Log (base 2) FC'),
+    legendPosition = 'right',
+    legendLabSize = 12,
+    legendIconSize = 3.0,
+    gridlines.major = FALSE,
+    gridlines.minor = FALSE,
+    border = 'full',
+    borderWidth = 0.5,
+    borderColour = 'black')
+M_vol1
+dev.off()
+
+M_vol1
+```
+#Export TSV results
+
+```{r}
+F_resOrdered <- as.data.frame(F_resOrdered)
+write_tsv(F_resOrdered, file="Results_spreadsheets/exp_vs_pf_female_lung_results.tsv")
+write_csv(F_resOrdered, file="Results_spreadsheets/exp_vs_pf_female_lung_results.csv")
+```
+
+
+```{r}
+tiff(file = 'Figures/volcano/Male_exp_vs_pf_volcano_plot_lung.tiff', units="in", width=8, height=5, res=1000)
+M_vol1<- EnhancedVolcano(res_M,
+    lab = res_M$symbol,
+    x = 'log2FoldChange',
+    y = 'pvalue',
+    title = "Male Lung",
+    subtitle = "Exposed vs Pair Fed ",
+    ylim = c(0, -log10(10e-8)),
+    xlim = c(log2(10e-3), -log2(10e-3)),
+    FCcutoff = 1.0,
+    pCutoff = 0.05,
+    labSize = 3.0,
+    colAlpha = 1,
+    legendLabels=c('Not sig.','Log (base 2) FC','p-value',
+      'p-value & Log (base 2) FC'),
+    legendPosition = 'right',
+    legendLabSize = 12,
+    legendIconSize = 3.0,
+    gridlines.major = FALSE,
+    gridlines.minor = FALSE,
+    border = 'full',
+    borderWidth = 0.5,
+    borderColour = 'black')
+M_vol1
+dev.off()
+
+M_vol1
+```
+
+```{r}
+M_resOrdered <- as.data.frame(M_resOrdered)
+write_tsv(M_resOrdered, file="Results_spreadsheets/Male_exp_vs_pf_Lung_results.tsv")
+write_csv(M_resOrdered, file="Results_spreadsheets/Male_exp_vs_pf_Lung_results.csv")
+```
+
+
+---------------
+
+#**gene enrichment analysis (GSEA)**
+
+#Female
+```{r}
+x<- res_F[order(res_F$log2FoldChange, decreasing = TRUE),]  #reorder the genes based on significance
+x<-na.omit(x)
+
+gene_list<-x$log2FoldChange
+g_list<-data.frame(gene_list)
+colnames(g_list)<-"LFC"
+
+g_list$entrez<-x$ENTREZID
+
+
+hum_orthos<- orthologs(genes = g_list$entrez, species = "mouse", human = FALSE)
+
+DO_data<-merge(g_list, hum_orthos, by.x = "entrez", by.y= "entrez", all.x = TRUE)
+
+#rename the listed Fold changes for the genes with the human equivalent for DO
+genes1<-DO_data$LFC
+names(genes1)<-DO_data$human_entrez
+genes1<-genes1[order(genes1, decreasing=TRUE)]
+head(genes1,10)
+```
+#Male
+```{r}
+x<- res_M[order(res_M$log2FoldChange, decreasing = TRUE),]  #reorder the genes based on significance
+x<-na.omit(x)
+
+gene_list<-x$log2FoldChange
+g_list<-data.frame(gene_list)
+colnames(g_list)<-"LFC"
+
+g_list$entrez<-x$ENTREZID
+
+
+hum_orthos<- orthologs(genes = g_list$entrez, species = "mouse", human = FALSE)
+
+DO_data<-merge(g_list, hum_orthos, by.x = "entrez", by.y= "entrez", all.x = TRUE)
+
+#rename the listed Fold changes for the genes with the human equivalent for DO
+genes2<-DO_data$LFC
+names(genes2)<-DO_data$human_entrez
+genes2<-genes2[order(genes2, decreasing=TRUE)]
+head(genes2,10)
+```
+
+#Compare Cluster
+###Gene
+```{r}
+inputList <- list(`Female` = genes1, `Male` = genes2 )
+groups <- compareCluster(geneClusters=inputList,  fun = "gseGO", OrgDb=org.Hs.eg.db, pvalueCutoff = 0.05, pAdjustMethod = "none")
+
+data<-data.frame(groups)
+write.csv(data ,file="Figures/Enrichment/Grouped_exp_vs_PF_Lung_Gene_enrichment.csv")
+```
+
+
+```{r}
+tiff(file = 'Figures/Enrichment/Exp_vs_PF_Lung_grouped_gene_enrichment.tiff', units="in", width=8, height=5, res=1000)
+dot34<-dotplot(groups,showCategory=3, split=".sign") +
+  geom_point(shape = 1,colour = "black") +
+  scale_color_viridis(option = "inferno", direction = -1) +
+  facet_grid(.~.sign)+
+  theme(panel.spacing = unit(0.5, "cm",data = NULL), panel.grid.minor = element_blank())+
+  scale_y_discrete(labels = function(x) ifelse(str_detect(x, "gap"), "", str_wrap(x, width = 45)))+
+  theme(axis.text.y = element_text(size = 11), 
+        strip.background = element_blank(),
+        strip.text.x = element_text(size = 13),
+        axis.text.x = element_text(size = 14),
+        axis.title.x = element_blank(),
+        legend.text = element_text(size = 10),
+        legend.key.width= unit(0.3, 'cm'))  
+dot34
+dev.off()
+dot34
+```
+
+###KEGG
+```{r}
+groups <- compareCluster(geneClusters=inputList,  fun = "gseKEGG", pvalueCutoff = 0.05, pAdjustMethod = "none")
+
+
+data<-data.frame(groups)
+write.csv(data ,file="Figures/Enrichment/Exp_vs_PF_Grouped_lung_KEGG_enrichment.csv")
+```
+
+
+```{r}
+tiff(file = 'Figures/Enrichment/Exp_vs_PF_Lung_grouped_kegg_enrichment.tiff', units="in", width=8, height=5, res=1000)
+dot28<-dotplot(groups,showCategory=3, split=".sign") +
+  geom_point(shape = 1,colour = "black") +
+  scale_color_viridis(option = "inferno", direction = -1) +
+  facet_grid(.~.sign)+
+  theme(panel.spacing = unit(0.5, "cm",data = NULL), panel.grid.minor = element_blank())+
+  scale_y_discrete(labels = function(x) ifelse(str_detect(x, "gap"), "", str_wrap(x, width = 45)))+
+  theme(axis.text.y = element_text(size = 13), 
+        strip.background = element_blank(),
+        strip.text.x = element_text(size = 14),
+        axis.text.x = element_text(size = 12),
+        axis.title.x = element_blank(),
+        legend.text = element_text(size = 10),
+        legend.key.width= unit(0.3, 'cm'))  
+dot28
+dev.off()
+dot28
+```
+
+
+###Disease Ontology
+```{r}
+groups <- compareCluster(geneClusters=inputList,  fun = "gseDO", pvalueCutoff = 0.05, pAdjustMethod = "none")
+
+data<-data.frame(groups)
+write.csv(data ,file="Figures/Enrichment/Grouped_exp_vs_pf_Lung_Disease_enrichment.csv")
+```
+
+
+```{r}
+tiff(file = 'Figures/Enrichment/Exp_vs_PF_Lung_grouped_disease_enrichment.tiff', units="in", width=8, height=5, res=1000)
+dot32<-dotplot(groups,showCategory=3, split=".sign") +
+  geom_point(shape = 1,colour = "black") +
+  scale_color_viridis(option = "inferno", direction = -1) +
+  facet_grid(.~.sign)+
+  theme(panel.spacing = unit(0.5, "cm",data = NULL), panel.grid.minor = element_blank())+
+  scale_y_discrete(labels = function(x) ifelse(str_detect(x, "gap"), "", str_wrap(x, width = 45)))+
+  theme(axis.text.y = element_text(size = 12), 
+        strip.background = element_blank(),
+        strip.text.x = element_text(size = 14),
+        axis.text.x = element_text(size = 12),
+        axis.title.x = element_blank(),
+        legend.text = element_text(size = 10),
+        legend.key.width= unit(0.3, 'cm'))  
+dot32
+dev.off()
+dot32
+```
+
+##Lung
+```{r}
+big<- dot34/dot28/dot32
+
+
+tiff(file = 'Figures/Exp_vs_PF_Lung_dot_plots_big.tiff', units="in",width=10, height=15, res=500)
+big + plot_annotation(tag_levels = 'A') & 
+  theme(plot.tag = element_text(size = 16, vjust = -10))
+dev.off()
+
+```
+
+
 
 #plotting individual genes of interest
 Using normalized counts (prebuilt into DESEQ2) which normalizes counts by the estimated size factors (or normalization factors if these were used) and adds a pseudocount of 1/2 to allow for log scale plotting.
