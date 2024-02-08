@@ -78,7 +78,7 @@ We can now construct a DESeqDataSet object to formulate a starting point for our
 #removing outliers identified to clean and rerun analysis
 ```{r}
 se1<- se[,se$tissue_type == "lung"] ##change tissue type here
-#se1<-se1[ , !se1$bam_ID == c("CRBM_S32.bam","CRBM_S3.bam")] #remove specific outliers here
+se1<-se1[ , !se1$bam_ID == c("L28_CF.bam")] #remove specific outliers here
 se1 <- se1[rowSums(assay(se1)) >= 10, ]
 F_se<-se1[,se1$sex == "female"]
 M_se<-se1[,se1$sex == "male"]
@@ -121,7 +121,7 @@ percentVar <- round(100 * attr(data,
 ```
 #PCA Plot
 ```{r}
-tiff(file = 'Figures/PCA/Female_Lung_PCA.tiff', units="in", width=8, height=5, res=1000)
+tiff(file = 'Results_outlier_removed/Figures/PCA/Female_Lung_PCA_outlier_removed.tiff', units="in", width=8, height=5, res=1000)
 PCA <-ggplot(data, aes(PC1, 
                    PC2, 
                    color=exposure,
@@ -274,7 +274,7 @@ colnames(df)[1]<- "Exposure"
 ```
 
 ```{r}
-tiff(file = "Figures/female_Lung_heatmap.tiff", units="in", width=8, height=5, res=1000)
+tiff(file = "Results_outlier_removed/Figures/female_Lung_heatmap_outlier_removed.tiff", units="in", width=8, height=5, res=1000)
 heatmap<-pheatmap(mat, 
          annotation_col=df,
          labels_row = exp_resOrdered$symbol,
@@ -290,7 +290,7 @@ heatmap
 
 #***volcano plots***
 ```{r}
-tiff(file = 'Figures/volcano/Female_Exposed_volcano_plot_Lung.tiff', units="in", width=8, height=5, res=1000)
+tiff(file = 'Results_outlier_removed/Figures/volcano/Female_Exposed_volcano_plot_Lung_outlier_removed.tiff', units="in", width=8, height=5, res=1000)
 M_vol1<- EnhancedVolcano(res_exp,
     lab = res_exp$symbol,
     x = 'log2FoldChange',
@@ -322,14 +322,14 @@ M_vol1
 
 ```{r}
 exp_resOrdered <- as.data.frame(exp_resOrdered)
-write_tsv(exp_resOrdered, file="Results_spreadsheets/exp_female_lung_results.tsv")
-write_csv(exp_resOrdered, file="Results_spreadsheets/exp_female_lung_results.csv")
-write_csv(as.data.frame(assay(F_se)), file= "Results_spreadsheets/female_lung_counts.csv")
+write_tsv(exp_resOrdered, file="Results_outlier_removed/Results_spreadsheets/exp_female_lung_results_outlier_removed.tsv")
+write_csv(exp_resOrdered, file="Results_outlier_removed/Results_spreadsheets/exp_female_lung_results_outlier_removed.csv")
+write_csv(as.data.frame(assay(F_se)), file= "Results_outlier_removed/Results_spreadsheets/female_lung_counts_outlier_removed.csv")
 ```
 
 
 ```{r}
-tiff(file = 'Figures/volcano/Female_pair_fed_volcano_plot_lung.tiff', units="in", width=8, height=5, res=1000)
+tiff(file = 'Results_outlier_removed/Figures/volcano/Female_pair_fed_volcano_plot_lung_outlier_removed.tiff', units="in", width=8, height=5, res=1000)
 M_vol1<- EnhancedVolcano(res_pf,
     lab = res_pf$symbol,
     x = 'log2FoldChange',
@@ -360,8 +360,8 @@ M_vol1
 
 ```{r}
 pf_resOrdered <- as.data.frame(pf_resOrdered)
-write_tsv(pf_resOrdered, file="Results_spreadsheets/Female_pf_lung_results.tsv")
-write_csv(pf_resOrdered, file="Results_spreadsheets/Female_pf_lung_results.csv")
+write_tsv(pf_resOrdered, file="Results_outlier_removed/Results_spreadsheets/Female_pf_lung_results_outlier_removed.tsv")
+write_csv(pf_resOrdered, file="Results_outlier_removed/Results_spreadsheets/Female_pf_lung_results_outlier_removed.csv")
 ```
 
 
@@ -421,12 +421,12 @@ inputList <- list(`Exposed` = genes1, `Pair-Fed` = genes2 )
 groups <- compareCluster(geneClusters=inputList,  fun = "gseGO", OrgDb=org.Hs.eg.db, pvalueCutoff = 0.05, pAdjustMethod = "none")
 
 data<-data.frame(groups)
-write.csv(data ,file="Figures/Enrichment/Grouped_female_lung_Gene_enrichment.csv")
+write.csv(data ,file="Results_outlier_removed/Figures/Enrichment/Grouped_female_lung_Gene_enrichment_outliers_removed.csv")
 ```
 
 
 ```{r}
-tiff(file = 'Figures/Enrichment/Female_lung_grouped_gene_enrichment.tiff', units="in", width=8, height=5, res=1000)
+tiff(file = 'Results_outlier_removed/Figures/Enrichment/Female_lung_grouped_gene_enrichment_outlier_removed.tiff', units="in", width=8, height=5, res=1000)
 dot34<-dotplot(groups,showCategory=3, split=".sign") +
   geom_point(shape = 1,colour = "black") +
   scale_color_viridis(option = "inferno", direction = -1) +
@@ -451,12 +451,12 @@ groups <- compareCluster(geneClusters=inputList,  fun = "gseKEGG", pvalueCutoff 
 
 
 data<-data.frame(groups)
-write.csv(data ,file="Figures/Enrichment/Female_Grouped_lung_KEGG_enrichment.csv")
+write.csv(data ,file="Results_outlier_removed/Figures/Enrichment/Female_Grouped_lung_KEGG_enrichment_outlier_removed.csv")
 ```
 
 
 ```{r}
-tiff(file = 'Figures/Enrichment/Female_lung_grouped_kegg_enrichment.tiff', units="in", width=8, height=5, res=1000)
+tiff(file = 'Results_outlier_removed/Figures/Enrichment/Female_lung_grouped_kegg_enrichment_outlier_removed.tiff', units="in", width=8, height=5, res=1000)
 dot28<-dotplot(groups,showCategory=3, split=".sign") +
   geom_point(shape = 1,colour = "black") +
   scale_color_viridis(option = "inferno", direction = -1) +
@@ -481,12 +481,12 @@ dot28
 groups <- compareCluster(geneClusters=inputList,  fun = "gseDO", pvalueCutoff = 0.05, pAdjustMethod = "none")
 
 data<-data.frame(groups)
-write.csv(data ,file="Figures/Enrichment/Grouped_Female_lung_Disease_enrichment.csv")
+write.csv(data ,file="Results_outlier_removed/Figures/Enrichment/Grouped_Female_lung_Disease_enrichment_outlier_removed.csv")
 ```
 
 
 ```{r}
-tiff(file = 'Figures/Enrichment/Female_lung_grouped_disease_enrichment.tiff', units="in", width=8, height=5, res=1000)
+tiff(file = 'Results_outlier_removed/Figures/Enrichment/Female_lung_grouped_disease_enrichment_outlier_removed.tiff', units="in", width=8, height=5, res=1000)
 dot32<-dotplot(groups,showCategory=3, split=".sign") +
   geom_point(shape = 1,colour = "black") +
   scale_color_viridis(option = "inferno", direction = -1) +
@@ -510,7 +510,7 @@ dot32
 big<- dot34/dot28/dot32
 
 
-tiff(file = 'Figures/Female_Lung_dot_plots_big.tiff', units="in",width=10, height=15, res=500)
+tiff(file = 'Results_outlier_removed/Figures/Female_Lung_dot_plots_big_outlier_removed.tiff', units="in",width=10, height=15, res=500)
 big + plot_annotation(tag_levels = 'A') & 
   theme(plot.tag = element_text(size = 16, vjust = -10))
 dev.off()
@@ -1069,7 +1069,7 @@ M_resOrdered <- res_M[order(res_M$padj),]
 
 #***volcano plots***
 ```{r}
-tiff(file = 'Figures/volcano/Female_Exposed_vs_PF_volcano_plot_lung.tiff', units="in", width=8, height=5, res=1000)
+tiff(file = 'Results_outlier_removed/Figures/volcano/Female_Exposed_vs_PF_volcano_plot_lung_outlier_removed.tiff', units="in", width=8, height=5, res=1000)
 M_vol1<- EnhancedVolcano(res_F,
     lab = res_F$symbol,
     x = 'log2FoldChange',
@@ -1101,8 +1101,8 @@ M_vol1
 
 ```{r}
 F_resOrdered <- as.data.frame(F_resOrdered)
-write_tsv(F_resOrdered, file="Results_spreadsheets/exp_vs_pf_female_lung_results.tsv")
-write_csv(F_resOrdered, file="Results_spreadsheets/exp_vs_pf_female_lung_results.csv")
+write_tsv(F_resOrdered, file="Results_outlier_removed/Results_spreadsheets/exp_vs_pf_female_lung_results_outlier_removed.tsv")
+write_csv(F_resOrdered, file="Results_outlier_removed/Results_spreadsheets/exp_vs_pf_female_lung_results_outlier_removed.csv")
 ```
 
 
@@ -1199,12 +1199,12 @@ inputList <- list(`Female` = genes1, `Male` = genes2 )
 groups <- compareCluster(geneClusters=inputList,  fun = "gseGO", OrgDb=org.Hs.eg.db, pvalueCutoff = 0.05, pAdjustMethod = "none")
 
 data<-data.frame(groups)
-write.csv(data ,file="Figures/Enrichment/Grouped_exp_vs_PF_Lung_Gene_enrichment.csv")
+write.csv(data ,file="Results_outlier_removed/Figures/Enrichment/Grouped_exp_vs_PF_Lung_Gene_enrichment_outlier_removed.csv")
 ```
 
 
 ```{r}
-tiff(file = 'Figures/Enrichment/Exp_vs_PF_Lung_grouped_gene_enrichment.tiff', units="in", width=8, height=5, res=1000)
+tiff(file = 'Results_outlier_removed/Figures/Enrichment/Exp_vs_PF_Lung_grouped_gene_enrichment_outlier_removed.tiff', units="in", width=8, height=5, res=1000)
 dot34<-dotplot(groups,showCategory=3, split=".sign") +
   geom_point(shape = 1,colour = "black") +
   scale_color_viridis(option = "inferno", direction = -1) +
@@ -1229,12 +1229,12 @@ groups <- compareCluster(geneClusters=inputList,  fun = "gseKEGG", pvalueCutoff 
 
 
 data<-data.frame(groups)
-write.csv(data ,file="Figures/Enrichment/Exp_vs_PF_Grouped_lung_KEGG_enrichment.csv")
+write.csv(data ,file="Results_outlier_removed/Figures/Enrichment/Exp_vs_PF_Grouped_lung_KEGG_enrichment_outlier_removed.csv")
 ```
 
 
 ```{r}
-tiff(file = 'Figures/Enrichment/Exp_vs_PF_Lung_grouped_kegg_enrichment.tiff', units="in", width=8, height=5, res=1000)
+tiff(file = 'Results_outlier_removed/Figures/Enrichment/Exp_vs_PF_Lung_grouped_kegg_enrichment_outlier_removed.tiff', units="in", width=8, height=5, res=1000)
 dot28<-dotplot(groups,showCategory=3, split=".sign") +
   geom_point(shape = 1,colour = "black") +
   scale_color_viridis(option = "inferno", direction = -1) +
@@ -1259,12 +1259,12 @@ dot28
 groups <- compareCluster(geneClusters=inputList,  fun = "gseDO", pvalueCutoff = 0.05, pAdjustMethod = "none")
 
 data<-data.frame(groups)
-write.csv(data ,file="Figures/Enrichment/Grouped_exp_vs_pf_Lung_Disease_enrichment.csv")
+write.csv(data ,file="Results_outlier_removed/Figures/Enrichment/Grouped_exp_vs_pf_Lung_Disease_enrichment_outlier_removed.csv")
 ```
 
 
 ```{r}
-tiff(file = 'Figures/Enrichment/Exp_vs_PF_Lung_grouped_disease_enrichment.tiff', units="in", width=8, height=5, res=1000)
+tiff(file = 'Results_outlier_removed/Figures/Enrichment/Exp_vs_PF_Lung_grouped_disease_enrichment_outlier_removed.tiff', units="in", width=8, height=5, res=1000)
 dot32<-dotplot(groups,showCategory=3, split=".sign") +
   geom_point(shape = 1,colour = "black") +
   scale_color_viridis(option = "inferno", direction = -1) +
@@ -1288,7 +1288,7 @@ dot32
 big<- dot34/dot28/dot32
 
 
-tiff(file = 'Figures/Exp_vs_PF_Lung_dot_plots_big.tiff', units="in",width=10, height=15, res=500)
+tiff(file = 'Results_outlier_removed/Figures/Exp_vs_PF_Lung_dot_plots_big_outlier_removed.tiff', units="in",width=10, height=15, res=500)
 big + plot_annotation(tag_levels = 'A') & 
   theme(plot.tag = element_text(size = 16, vjust = -10))
 dev.off()
@@ -1301,70 +1301,70 @@ dev.off()
 Using normalized counts (prebuilt into DESEQ2) which normalizes counts by the estimated size factors (or normalization factors if these were used) and adds a pseudocount of 1/2 to allow for log scale plotting.
 **drug metabolizing enzymes**
 ```{r}
-top_gene<-read.csv("gene_list_drug_metabolizing_kegg_CRBLM.csv", header = FALSE)
-top_gene<-as.character(top_gene$V1)
-
-setdiff(top_gene,rownames(counts(dds))) #check if all genes of interest can be found in the rownames of the deseq object --> if not you will not be able to run the block of code. Character(0) or integer(0) is a what you want to see
+# top_gene<-read.csv("gene_list_drug_metabolizing_kegg_CRBLM.csv", header = FALSE)
+# top_gene<-as.character(top_gene$V1)
+# 
+# setdiff(top_gene,rownames(counts(dds))) #check if all genes of interest can be found in the rownames of the deseq object --> if not you will not be able to run the block of code. Character(0) or integer(0) is a what you want to see
 ```
 ```{r}
-stat.test<-read.csv("CRBLM_FDR.csv")
-stat.test$symbol<-factor(stat.test$symbol)
-stat.test$group2<-as.factor(stat.test$group2)
-stat.test$group1<-as.factor(stat.test$group1)
-stat.test
+# stat.test<-read.csv("CRBLM_FDR.csv")
+# stat.test$symbol<-factor(stat.test$symbol)
+# stat.test$group2<-as.factor(stat.test$group2)
+# stat.test$group1<-as.factor(stat.test$group1)
+# stat.test
 ```
 
 ```{r}
-data_1 <- split(as.tibble(stat.test[,2:4]), as.factor(stat.test$symbol))
+# data_1 <- split(as.tibble(stat.test[,2:4]), as.factor(stat.test$symbol))
 ```
 
 
 ```{r message=FALSE}
-plot_list<-list()
-for (i in unique(1:length(top_gene))){
-  gene <- top_gene[i]
-  b<- plotCounts(dds, gene = gene, intgroup = "exposure",normalized = TRUE, returnData = TRUE)
-  z = max(b$count) + (max(b$count)*0.05)
-  d <- ggplot(b, aes(factor(exposure), count))+
-    geom_violin(mapping = aes(x = exposure, 
-                              y = count, 
-                              fill = exposure))+
-    #adding jitter to avoid overplotting
-    geom_point(mapping = aes(x = exposure, 
-                             y = count, 
-                             fill = exposure, 
-                             shape= exposure), 
-               size = 5, position = position_jitter(width = 0.3, height=0))+ 
-    scale_y_continuous(expand = c(0,0) , limits = c(0,z+z*0.4)) +
-    stat_summary(mapping = aes(x = exposure, y = count), 
-                 geom = 'crossbar', 
-                 fun= 'mean', 
-                 colour = 'black', 
-                 width=0.2)+
-    scale_fill_manual(values = c("#666666", "#FF66CC","#66CCCC","#9966FF")) +
-    scale_shape_manual(values = c(19, 15,17,18)) +
-  labs(x = NULL, y = "Normalized counts")+ # changes the y axis label, removes x axis label
-  theme_classic(base_size = 20)+# changes the overall style of the plot
-  ggtitle(paste0(res_low$symbol[gene])) +
-  theme(
-    axis.text.x = element_text(colour = "black"),
-    axis.text.y = element_text(colour = "black"))+
-  stat_pvalue_manual(data_1[[i]], 
-    y.position = z, step.increase = 0.2,
-    label = "p = {scales::pvalue(p.adj)}", hide.ns = TRUE
-    )
-  plot_list[[gene]] <- d
-}
-
-head(plot_list)
+# plot_list<-list()
+# for (i in unique(1:length(top_gene))){
+#   gene <- top_gene[i]
+#   b<- plotCounts(dds, gene = gene, intgroup = "exposure",normalized = TRUE, returnData = TRUE)
+#   z = max(b$count) + (max(b$count)*0.05)
+#   d <- ggplot(b, aes(factor(exposure), count))+
+#     geom_violin(mapping = aes(x = exposure, 
+#                               y = count, 
+#                               fill = exposure))+
+#     #adding jitter to avoid overplotting
+#     geom_point(mapping = aes(x = exposure, 
+#                              y = count, 
+#                              fill = exposure, 
+#                              shape= exposure), 
+#                size = 5, position = position_jitter(width = 0.3, height=0))+ 
+#     scale_y_continuous(expand = c(0,0) , limits = c(0,z+z*0.4)) +
+#     stat_summary(mapping = aes(x = exposure, y = count), 
+#                  geom = 'crossbar', 
+#                  fun= 'mean', 
+#                  colour = 'black', 
+#                  width=0.2)+
+#     scale_fill_manual(values = c("#666666", "#FF66CC","#66CCCC","#9966FF")) +
+#     scale_shape_manual(values = c(19, 15,17,18)) +
+#   labs(x = NULL, y = "Normalized counts")+ # changes the y axis label, removes x axis label
+#   theme_classic(base_size = 20)+# changes the overall style of the plot
+#   ggtitle(paste0(res_low$symbol[gene])) +
+#   theme(
+#     axis.text.x = element_text(colour = "black"),
+#     axis.text.y = element_text(colour = "black"))+
+#   stat_pvalue_manual(data_1[[i]], 
+#     y.position = z, step.increase = 0.2,
+#     label = "p = {scales::pvalue(p.adj)}", hide.ns = TRUE
+#     )
+#   plot_list[[gene]] <- d
+# }
+# 
+# head(plot_list)
 ```
 
 
 ```{r warning=FALSE}
 # Export into pdf: display multiple plots on the same page
-ggexport(
-  plotlist = plot_list, filename = "Figures/male_CRBLM_cyp_plot.pdf", 
-  ncol = 1, nrow = 1, height = 7, width = 7, res = 600,pointsize = 8
-)
+# ggexport(
+#   plotlist = plot_list, filename = "Figures/male_CRBLM_cyp_plot.pdf", 
+#   ncol = 1, nrow = 1, height = 7, width = 7, res = 600,pointsize = 8
+# )
 ```
 
